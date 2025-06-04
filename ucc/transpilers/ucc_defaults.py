@@ -1,5 +1,9 @@
 # Construct a custom compiler
 import os
+import logging
+
+# Set logging level to INFO
+logging.basicConfig(level=logging.INFO)
 
 try:
     from qiskit.utils.parallel import default_num_processes
@@ -28,9 +32,11 @@ from qiskit.transpiler.passes import (
     UnitarySynthesis,
     Optimize1qGatesDecomposition,
     VF2PostLayout,
+    Commuting2qGateRouter,
 )
 from typing import Optional
-
+from qiskit.transpiler.passes.routing.commuting_2q_gate_routing import SwapStrategy 
+from ucc.transpilers.custom_passes import ParallelizeCommutingGates
 
 CONFIG = user_config.get_config()
 
@@ -105,6 +111,8 @@ class UCCDefault1:
 
             self.pass_manager.append(VF2Layout(target=target_device))
             self.pass_manager.append(ApplyLayout())
+            logging.info("ParallelizeCommutingGates")
+            self.pass_manager.append(ParallelizeCommutingGates(coupling_map))
             self.pass_manager.append(
                 SabreSwap(
                     coupling_map,

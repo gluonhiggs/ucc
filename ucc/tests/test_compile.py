@@ -13,6 +13,8 @@ from qiskit.circuit.library import HGate, XGate
 from ucc.tests.mock_backends import Mybackend
 from ucc import compile
 from ucc.transpilers.ucc_defaults import UCCDefault1
+from ucc.transpilers.custom_passes import ParallelizeCommutingGates
+from qiskit.transpiler import CouplingMap
 import numpy as np
 
 
@@ -142,6 +144,16 @@ def test_custom_pass():
         analysis_pass.run(dag)
         assert analysis_pass.property_set["check_map"]
 
+def test_parallelize_commuting_gates_integration():
+    from ucc.tests.mock_backends import Mybackend
+
+    circuit = QiskitCircuit(4)
+    circuit.cx(0, 1)
+    circuit.cx(2, 3)
+    target_device = Mybackend().target
+    compiled_circuit = compile(circuit, return_format="original", target_device=target_device)
+    assert isinstance(compiled_circuit, QiskitCircuit)
+    # Optionally, check depth is 1 if coupling map allows parallel CNOTs
 
 def test_compile_with_target_gateset():
     """Test that the final circuit respects the user-defined gateset, no target device"""
