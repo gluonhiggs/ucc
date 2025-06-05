@@ -6,10 +6,11 @@ sys.path.insert(0, os.path.abspath("../../"))
 sys.path.insert(0, os.path.abspath("../../../"))
 
 from ucc._version import __version__
-
+from datetime import datetime
 
 project = "ucc"
-copyright = "2024, Unitary Foundation"
+current_year = datetime.now().year
+copyright = f"2024–{current_year}, Unitary Foundation"
 author = "Unitary Foundation"
 directory_of_this_file = os.path.dirname(os.path.abspath(__file__))
 release = __version__
@@ -22,7 +23,10 @@ extensions = [
     "sphinx.ext.autodoc",
     "myst_parser",
     "sphinx.ext.doctest",
+    "sphinxcontrib.bibtex",
 ]
+
+bibtex_bibfiles = ["refs.bib"]
 
 myst_enable_extensions = [
     "linkify",

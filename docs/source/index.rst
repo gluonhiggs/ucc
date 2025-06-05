@@ -3,6 +3,12 @@ Welcome to the docs!
 
 .. include:: ../../README.md
    :parser: myst_parser.sphinx_
+   :end-before: <!-- start-changelog-link-to-remove-for-docs -->
+
+
+.. include:: ../../README.md
+   :parser: myst_parser.sphinx_
+   :start-after: <!-- end-changelog-link-to-remove-for-docs -->
    :end-before: <!-- start-how-does-ucc-stack-up -->
 
 .. include:: ../../README.md
@@ -19,6 +25,7 @@ Welcome to the docs!
    Benchmarking <benchmarking.rst>
    Developer Documentation <dev.rst>
    Code of Conduct <CODE_OF_CONDUCT.rst>
+   Research References <research_references.rst>
 
 
 
