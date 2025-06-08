@@ -13,7 +13,6 @@ from qiskit.circuit.library import HGate, XGate
 from ucc.tests.mock_backends import Mybackend
 from ucc import compile
 from ucc.transpilers.ucc_defaults import UCCDefault1
-from ucc.transpilers.custom_passes import ParallelizeCommutingGates
 from qiskit.transpiler import CouplingMap
 import numpy as np
 

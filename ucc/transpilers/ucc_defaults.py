@@ -1,9 +1,5 @@
 # Construct a custom compiler
 import os
-import logging
-
-# Set logging level to INFO
-logging.basicConfig(level=logging.INFO)
 
 try:
     from qiskit.utils.parallel import default_num_processes
@@ -32,11 +28,13 @@ from qiskit.transpiler.passes import (
     UnitarySynthesis,
     Optimize1qGatesDecomposition,
     VF2PostLayout,
+    OptimizeCliffords,
+    RemoveDiagonalGatesBeforeMeasure,
     Commuting2qGateRouter,
+    InverseCancellation
 )
 from typing import Optional
-from qiskit.transpiler.passes.routing.commuting_2q_gate_routing import SwapStrategy 
-from ucc.transpilers.custom_passes import ParallelizeCommutingGates
+from qiskit.circuit.library import CXGate, HGate
 
 CONFIG = user_config.get_config()
 
@@ -76,6 +74,7 @@ class UCCDefault1:
 
     def _add_local_passes(self, local_iterations):
         for _ in range(local_iterations):
+            self.pass_manager.append(InverseCancellation([CXGate(), HGate()])) 
             self.pass_manager.append(Optimize1qGatesDecomposition())
             self.pass_manager.append(CommutativeCancellation())
             self.pass_manager.append(Collect2qBlocks())
@@ -85,6 +84,7 @@ class UCCDefault1:
             )
             # self.pass_manager.append(Optimize1qGatesDecomposition(basis=self._1q_basis))
             self.pass_manager.append(CollectCliffords())
+            # self.pass_manager.append(OptimizeCliffords())
             self.pass_manager.append(
                 HighLevelSynthesis(hls_config=HLSConfig(clifford=["greedy"]))
             )
@@ -92,7 +92,7 @@ class UCCDefault1:
             # Add following passes if merging single qubit rotations that are interrupted by a commuting 2 qubit gate is desired
             # self.pass_manager.append(Optimize1qGatesSimpleCommutation(basis=self._1q_basis))
             # self.pass_manager.append(BasisTranslator(sel, target_basis=self.target_basis))
-
+        # self.pass_manager.append(RemoveDiagonalGatesBeforeMeasure())
     def _add_map_passes(self, target_device: Optional[Target] = None):
         if target_device is not None:
             coupling_map = target_device.build_coupling_map()
@@ -111,8 +111,7 @@ class UCCDefault1:
 
             self.pass_manager.append(VF2Layout(target=target_device))
             self.pass_manager.append(ApplyLayout())
-            logging.info("ParallelizeCommutingGates")
-            self.pass_manager.append(ParallelizeCommutingGates(coupling_map))
+            
             self.pass_manager.append(
                 SabreSwap(
                     coupling_map,
@@ -122,6 +121,7 @@ class UCCDefault1:
                 )
             )
             # self.pass_manager.append(MapomaticLayout(coupling_map))
+            self.pass_manager.append(Commuting2qGateRouter(coupling_map))
             self.pass_manager.append(VF2PostLayout(target=target_device))
             self.pass_manager.append(ApplyLayout())
             self._add_local_passes(1)
